@@ -6,12 +6,10 @@ import re
 import threading
 from datetime import datetime, timezone
 from pathlib import Path
-from zoneinfo import ZoneInfo
 
 from .config import DEFAULT_ROUTES, ReceiverSettings
 
 
-_CENTRAL = ZoneInfo("America/Chicago")
 
 
 def _safe_name(value: object, fallback: str = "MESSAGE") -> str:
@@ -98,7 +96,7 @@ class Receiver:
 
         routes = self.routes_for(message)
         received = _utc_stamp()
-        central_stamp = datetime.now(_CENTRAL).strftime("%Y%m%d-%H%M%S-%f")
+        central_stamp = datetime.now().astimezone().strftime("%Y%m%d-%H%M%S-%f")
         product_id = _safe_name(product.get("pil") or product.get("code"), "SPS")
         with self._lock:
             self._total += 1
