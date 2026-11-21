@@ -2,7 +2,7 @@
 
 LOTIEM is the receiving side of the LOTWPS weather-message workflow. LOTWPS creates and edits forecast products, warnings, watches, advisories, statements, and simulated emergency messages; LOTIEM accepts those messages over the local network, records them, and places a copy in each enabled destination queue.
 
-**Companion project:** [LOTWPS — LOT Weather Processing System](https://github.com/nicholasgville23/LOTWPS/tree/feature/voicetext-paul-and-package-layout)
+**Companion project:** [LOTWPS — LOT Weather Processing System](https://github.com/nicholasgville23/LOTWPS/pull/4)
 
 The LOTIEM service in this repository is a small, standalone Python 3.12 receiver. The Tkinter text workstation, BMH network window, transmitter controller, AWIPS-style display, simulated weather engine, and audio player remain in LOTWPS.
 
