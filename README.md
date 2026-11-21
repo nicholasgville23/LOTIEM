@@ -19,7 +19,7 @@ The route folders are **outbound queues**, not live integrations. This initial r
 
 ## Install on Windows
 
-Use Python 3.12 from python.org (including Tcl/Tk is useful for the companion LOTWPS GUI, but LOTIEM itself is headless).
+Use Python 3.12 from python.org and set the receiving computer's Windows time zone to Central Time for America/Chicago station timestamps. (Tcl/Tk is useful for the companion LOTWPS GUI, but LOTIEM itself is headless.)
 
 ```bat
 git clone https://github.com/nicholasgville23/LOTIEM.git
