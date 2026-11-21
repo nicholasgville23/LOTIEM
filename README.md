@@ -1,9 +1,96 @@
-# LOTIEM / LOTWPS
+# LOTIEM — Receiving and Distribution Service
 
-Software Frameworks that run the core weather processing system of Chicago, Illinois and Northwest Indiana.
-LOTWPS: Stands for the LOT Weather Processing System. Originally rooted in Chicago, Illinois, the system framework is currently transitioning its operational to the Chicago, Illinois. Future system upgrades plan to transition the hardcoded station identifier from IWX to LOT. This framework is responsible for providing quick and fast weather models to the forecaster and is the "sender" of the entire database. This framework contains applications such as, lotwps_tw.exe which is the text workstation that forecasters use to create, edit, and distribute forecast messages such as Warnings, Watches, Advisories, statements, non weather emergency messages, etc. This software is also responsible of hosting the Broadcast Message Handler client which controls all stations across Chicago, Illinois. Keep in mind that the station servers are located on each individual computer per station...lotwps_awips.exe which is the client that forecasters use which loads the geographical data of Chicago Illinois, and loads CONUS radar data and storm rotation information, and provides them with the ability to create storm-based polygons and send them to WarnGen, which creates the short term convective warnings.
-LOTIEM: Currently stands for "Chicago Illinois Iowa Environmental Mesonet." It is slated to be renamed to "Chicago Illinois Integrated Emergency Manager" in future software builds. This framework is the 'receiving' end of the database. This software receives messages sent from LOTWPS, and distributes them out to the BMH system, the WwA system, and local officials and the general public.
+LOTIEM is the receiving side of the LOTWPS weather-message workflow. LOTWPS creates and edits forecast products, warnings, watches, advisories, statements, and simulated emergency messages; LOTIEM accepts those messages over the local network, records them, and places a copy in each enabled destination queue.
 
-## Simulated NOAA Weather Radio Stations (Chicago/Romeoville, Illinois and Northwestern Indiana) from the BMH (Broadcast Message Handler) system.
-* **WXJ75 (Valparaiso, Indiana):** A simulated NWR transmitter serving the Porter Township. It operates on a frequency of 162.400 MHz using a wireless audio feed.
-* **KBB58 (Gary, Indiana):** A simulated NWR transmitter serving the Lake Township. It operates on a frequency of 162.425 MHz using a wireless audio feed.
+**Companion project:** [LOTWPS — LOT Weather Processing System](https://github.com/nicholasgville23/LOTWPS/tree/feature/voicetext-paul-and-package-layout)
+
+The LOTIEM service in this repository is a small, standalone Python 3.12 receiver. The Tkinter text workstation, BMH network window, transmitter controller, AWIPS-style display, simulated weather engine, and audio player remain in LOTWPS.
+
+## What this build does
+
+- Accepts newline-delimited JSON over TCP from LOTWPS.
+- Listens on `0.0.0.0:28894` by default; the configured LAN destination is `10.0.0.117:28894`.
+- Validates the JSON envelope and message payload.
+- Routes requested messages to enabled queues: `BMH`, `WWA`, `LOCAL_OFFICIALS`, `PUBLIC`, `IEMBOT`, `EMAIL`, and `WEBSITES`.
+- Writes a JSON copy into `var/lotiem/routes/<ROUTE>/`, appends a replayable `messages.jsonl` audit log, and stores delivery counters.
+- Returns a JSON acknowledgement to the sending LOTWPS client.
+
+The route folders are **outbound queues**, not live integrations. This initial receiver does not log in to email accounts, publish websites, connect to IEMBOT, or contact emergency-management systems. Those adapters need endpoint details, credentials, and their own security review before they can be enabled.
+
+## Install on Windows
+
+Use Python 3.12 from python.org (including Tcl/Tk is useful for the companion LOTWPS GUI, but LOTIEM itself is headless).
+
+```bat
+git clone https://github.com/nicholasgville23/LOTIEM.git
+cd LOTIEM
+copy config\settings.example.json config\settings.json
+py -3.12 -m pip install -r requirements.txt
+py -3.12 -m lotiem.server
+```
+
+Alternatively, run `py -3.12 run_lotiem.py`.
+
+On first run, the service creates its runtime folders under `var/lotiem/`. It uses only the Python standard library; `requirements.txt` is intentionally empty.
+
+## Configure the LOTWPS sender
+
+On the LOTWPS computer, set these values in `config/settings.json`:
+
+```json
+{
+  "lotiem": {
+    "host": "10.0.0.117",
+    "port": 28894,
+    "transport": "tcp"
+  }
+}
+```
+
+The LOTWPS LAN profile in its feature branch is already set to this address and port. Start **one** LOTIEM listener on the receiving computer before dispatching TCP messages. LOTWPS also contains a compatible embedded LOTIEM service; do not run that listener and this standalone listener on the same IP/port simultaneously.
+
+## Network security
+
+This TCP endpoint is unauthenticated and unencrypted in this simulator build. Keep it on a trusted private LAN or VPN, and create a Windows Firewall inbound rule restricted to the LOTWPS sender and the required private subnet. **Do not expose port 28894 to the public internet.** Add authentication and TLS before using it beyond a trusted lab network.
+
+## Message protocol
+
+LOTWPS opens a TCP connection, sends one UTF-8 JSON object followed by a newline, then waits for one JSON acknowledgement. Example:
+
+```json
+{
+  "seq": 123456789,
+  "ts": "2026-11-20T18:30:00Z",
+  "topic": "product",
+  "from": "LOTWPS",
+  "to": "LOTIEM",
+  "payload": {
+    "product": {
+      "pil": "SVRLOT",
+      "name": "Severe Thunderstorm Warning"
+    },
+    "ugc": ["INZ001", "INZ002"],
+    "text": "SIMULATED TEST MESSAGE — THIS IS NOT AN OFFICIAL WARNING.",
+    "options": {
+      "routes": ["BMH", "PUBLIC"]
+    }
+  }
+}
+```
+
+A successful response has `status: "ok"` and the list of routes accepted by the receiver. Requested routes are intersected with the enabled routes in `config/settings.json`; an unavailable route is not silently enabled.
+
+## Run tests
+
+```bat
+py -3.12 -m unittest discover -s tests -v
+```
+
+## Project status and scope
+
+- Product text and alerts supplied by the companion simulator may be synthetic. Verify all weather information with the National Weather Service before relying on it.
+- WXJ75 (Valparaiso, 162.400 MHz) and KBB58 (Gary, 162.425 MHz) are simulated station profiles in LOTWPS. This receiver does not transmit radio signals.
+- SAME/EAS audio generation and local playback belong to the simulator. This is not an authorized EAS origination or NOAA Weather Radio transmitter.
+- The currently described UI language is English; multilingual support is not implemented in this receiver build.
+
+LOTIEM name note: the repository's current project name is **Chicago Illinois Iowa Environmental Mesonet**; the planned expanded name is **Chicago Illinois Integrated Emergency Manager**.

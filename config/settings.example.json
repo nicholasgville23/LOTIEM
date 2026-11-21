@@ -1,0 +1,18 @@
+{
+  "network": {
+    "host": "10.0.0.117",
+    "bind_host": "0.0.0.0",
+    "port": 28894,
+    "max_message_bytes": 1048576
+  },
+  "data_dir": "var/lotiem",
+  "routes": {
+    "BMH": true,
+    "WWA": true,
+    "LOCAL_OFFICIALS": true,
+    "PUBLIC": true,
+    "IEMBOT": true,
+    "EMAIL": true,
+    "WEBSITES": true
+  }
+}
