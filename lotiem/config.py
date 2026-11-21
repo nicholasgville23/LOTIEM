@@ -32,6 +32,8 @@ class ReceiverSettings:
     @classmethod
     def load(cls, path: str | Path | None = None) -> "ReceiverSettings":
         settings_path = Path(path) if path else ROOT / "config" / "settings.json"
+        if not settings_path.is_absolute():
+            settings_path = ROOT / settings_path
         payload: dict[str, Any] = {}
         if settings_path.is_file():
             try:
@@ -43,6 +45,8 @@ class ReceiverSettings:
         route_config = payload.get("routes", {}) or {}
         route_flags = {name: bool(route_config.get(name, True)) for name in DEFAULT_ROUTES}
         data_dir = Path(payload.get("data_dir", ROOT / "var" / "lotiem")).expanduser()
+        if not data_dir.is_absolute():
+            data_dir = (ROOT / data_dir).resolve()
 
         try:
             port = int(network.get("port", 28894))
