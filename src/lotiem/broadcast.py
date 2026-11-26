@@ -17,6 +17,7 @@ class BroadcastQueue:
         self._counter = 0
         self._lock = threading.Lock()
         self._running = threading.Event()
+        self._stop_event = threading.Event()
         self._thread: threading.Thread | None = None
         self.on_message = on_message or (lambda message: None)
         self.current: WeatherMessage | None = None
@@ -29,6 +30,7 @@ class BroadcastQueue:
     def start(self, interval_seconds: int = 60) -> None:
         if self._thread and self._thread.is_alive():
             return
+        self._stop_event.clear()
         self._running.set()
         self._thread = threading.Thread(target=self._loop, args=(interval_seconds,),
                                         name="LOTIEM-BroadcastLoop", daemon=True)
@@ -36,6 +38,7 @@ class BroadcastQueue:
 
     def stop(self) -> None:
         self._running.clear()
+        self._stop_event.set()
         if self._thread and self._thread.is_alive():
             self._thread.join(timeout=3)
 
@@ -51,7 +54,7 @@ class BroadcastQueue:
             finally:
                 self.current = None
                 self._queue.task_done()
-            self._running.wait(max(0, interval_seconds))
+            self._stop_event.wait(max(0, interval_seconds))
 
     @property
     def queue_length(self) -> int:
