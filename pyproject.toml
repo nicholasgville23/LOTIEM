@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lotiem-lotwps"
+version = "0.1.0"
+description = "Simulated LOTIEM receiving and LOTWPS distributing weather-radio system"
+requires-python = ">=3.13"
+dependencies = ["requests>=2.32", "audioop-lts>=0.2.1"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+
+[project.scripts]
+lotiem = "lotiem.app:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
