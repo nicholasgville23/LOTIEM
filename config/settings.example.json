@@ -24,7 +24,7 @@
   },
   "same": {
     "originator": "WXR",
-    "sender": "KLOT",
+    "sender": "KLOT0000",
     "default_duration_minutes": 15,
     "attention_tone_hz": 1050,
     "attention_tone_seconds": 8,
