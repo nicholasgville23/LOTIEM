@@ -1,0 +1,39 @@
+{
+  "system": {
+    "name": "KLOT LOTIEM TEXT WORKSTATION",
+    "timezone": "America/Chicago",
+    "simulation_only": true
+  },
+  "network": {
+    "bind_host": "0.0.0.0",
+    "port": 3000,
+    "api_token": "CHANGE-ME",
+    "stations": [
+      {"id": "WXJ75", "city": "Valparaiso", "state": "IN", "frequency_mhz": 162.400, "host": "10.0.0.117", "port": 3000},
+      {"id": "KBB58", "city": "Gary", "state": "IN", "frequency_mhz": 162.425, "host": "10.0.0.117", "port": 3001}
+    ]
+  },
+  "audio": {
+    "voice": "paul",
+    "voice_text_exe": "C:/Users/nicho/Downloads/nws-paul/voicetext_paul.exe",
+    "working_directory": "",
+    "command_template": [],
+    "output_directory": "runtime/audio",
+    "sample_rate": 22050,
+    "audioop_lts_enabled": true
+  },
+  "same": {
+    "originator": "WXR",
+    "sender": "KLOT",
+    "default_duration_minutes": 15,
+    "attention_tone_hz": 1050,
+    "attention_tone_seconds": 8,
+    "same_bursts": 3,
+    "eom_bursts": 3
+  },
+  "broadcast": {
+    "cycle_seconds": 60,
+    "default_mode": "General",
+    "priority_order": ["TORNADO_EMERGENCY", "FLASH_FLOOD_EMERGENCY", "TOR", "SVR", "FFW", "SQW", "WSW", "WSA", "BZW", "NPW", "WATCH", "ADVISORY", "STATEMENT"]
+  }
+}
